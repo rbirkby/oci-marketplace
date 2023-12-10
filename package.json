@@ -11,10 +11,10 @@
   },
   "keywords": [],
   "author": "Richard Birkby <rbirkby@gmail.com>",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "git@github.com:rbirkby/oci-marketplace.git"
   },
   "type": "module",
   "dependencies": {

@@ -1,0 +1,22 @@
+name: oci-distribution-conformance
+on: push
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run OCI Distribution Spec conformance tests
+        uses: opencontainers/distribution-spec@main
+        # you can also run against a specific tag or commit instead
+        # uses: opencontainers/distribution-spec@v1.1.0
+        env:
+          OCI_ROOT_URL: http://localhost:3000/
+          OCI_NAMESPACE: mytestorg/mytestrepo
+          OCI_USERNAME: ${{ secrets.MY_REGISTRY_USERNAME }}
+          OCI_PASSWORD: ${{ secrets.MY_REGISTRY_PASSWORD }}
+          OCI_TEST_PULL: 1
+          OCI_TEST_PUSH: 1
+          OCI_TEST_CONTENT_DISCOVERY: 1
+          OCI_TEST_CONTENT_MANAGEMENT: 1
+          OCI_HIDE_SKIPPED_WORKFLOWS: 0
+          OCI_DEBUG: 0
+          OCI_DELETE_MANIFEST_BEFORE_BLOBS: 0
