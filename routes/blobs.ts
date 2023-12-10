@@ -40,7 +40,7 @@ export default (repository: Repository) => {
 
     const sessionId = uuidv4();
     repository.addBlob(name, sessionId, Buffer.alloc(0));
-    res.status(202).location(`${request.baseUrl}/uploads/${sessionId}`).end();
+    res.location(`${request.baseUrl}/uploads/${sessionId}`).sendStatus(202);
   });
 
   blobsRouter.route('/uploads/:reference').patch(async (request: ReferenceRequest, res: Response) => {
@@ -58,10 +58,9 @@ export default (repository: Repository) => {
       repository.updateBlob(name, reference, start ?? 0, end ?? 0, request.body);
 
       res
-        .status(202)
         .header('Range', `0-${end}`) // distribution spec v1.1.0-rc2
         .location(`${request.baseUrl}/uploads/${reference}`)
-        .end();
+        .sendStatus(202);
     } catch (e) {
       if (e instanceof OciRangeError) {
         logger.debug(e);
@@ -90,7 +89,7 @@ export default (repository: Repository) => {
         repository.addBlob(name, reference, request.body);
         repository.setBlobDigest(name, reference, digest);
       }
-      res.status(201).location(`${request.baseUrl}/${request.query.digest}`).end();
+      res.location(`${request.baseUrl}/${request.query.digest}`).sendStatus(201);
     } catch (e) {
       if (e instanceof OciRangeError) {
         logger.debug(e);
@@ -108,7 +107,7 @@ export default (repository: Repository) => {
 
     repository.deleteBlob(name, digest);
 
-    res.status(202).end();
+    res.sendStatus(202);
   });
 
   blobsRouter.route('/uploads/').post(async (request: MountRequest, res: Response) => {
@@ -117,7 +116,7 @@ export default (repository: Repository) => {
     logger.debug('POST blob from another repository %s %s %s', name, digest, otherName);
 
     // Implementation does not support cross-repository mounting
-    res.status(202).end();
+    res.sendStatus(202);
   });
 
   // distribution spec v1.1.0-rc2
@@ -127,7 +126,7 @@ export default (repository: Repository) => {
 
     try {
       const end = repository.getBlobLength(name, reference);
-      res.status(204).header('Range', `0-${end}`).location(`${request.baseUrl}/uploads/${reference}`).end();
+      res.header('Range', `0-${end}`).location(`${request.baseUrl}/uploads/${reference}`).sendStatus(204);
     } catch (e) {
       logger.debug(e);
       res.status(404).json(errorResponse('BLOB_UNKNOWN'));

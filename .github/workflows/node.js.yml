@@ -23,7 +23,7 @@ jobs:
       - run: npm run build --if-present
       - run: npm test
       - run: npm run start &
-      - run: sleep 10
+      - run: sleep 3
       - name: Run OCI Distribution Spec conformance tests
         uses: opencontainers/distribution-spec@main
         # you can also run against a specific tag or commit instead

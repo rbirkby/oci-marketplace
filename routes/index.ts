@@ -17,12 +17,17 @@ const nameValidator = (request: Request, res: Response, next: NextFunction) => {
 
 export default function (app: Application, repository: Repository) {
   app.use(helmet());
+
   app.route('/v2').get(async (request, res) => {
-    res.status(200).end();
+    res.sendStatus(200);
   });
 
   app.use('/v2/:name(*)/blobs', nameValidator, blobsRouter(repository));
   app.use('/v2/:name(*)/manifests', nameValidator, manifestsRouter(repository));
   app.use('/v2/:name(*)/referrers', nameValidator, referrersRouter(repository));
   app.use('/v2/:name(*)/tags', nameValidator, tagsRouter(repository));
+
+  app.use((request, res) => {
+    res.sendStatus(404);
+  });
 }

@@ -19,7 +19,7 @@ export default (repository: Repository) => {
       tags = tags.slice(0, n);
     }
 
-    res.status(200).json({ name, tags }).end();
+    res.status(200).json({ name, tags });
   });
 
   return tagsRouter;

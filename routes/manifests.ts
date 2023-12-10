@@ -48,12 +48,11 @@ export default (repository: Repository) => {
     if (request.body.subject) {
       // OCI-Subject header added in distribution spec v1.1.0-rc2
       res
-        .status(201)
         .header('OCI-Subject', request.body.subject.digest)
         .location(`${request.baseUrl}/${reference}`)
-        .end();
+        .sendStatus(201);
     } else {
-      res.status(201).location(`${request.baseUrl}/${reference}`).end();
+      res.location(`${request.baseUrl}/${reference}`).sendStatus(201);
     }
   });
 
@@ -64,7 +63,7 @@ export default (repository: Repository) => {
 
     repository.deleteManifestOrTag(name, reference);
 
-    res.status(202).end();
+    res.sendStatus(202);
   });
 
   return manifestsRouter;
