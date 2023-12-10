@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import logger from '../logger';
 import { OciRangeError } from '../repositories/memoryRepository';
 import errorResponse from './errorfactory';
+import { digestValidator, referenceValidator } from './validators';
 
 const parseRange = (range: OciRange): number[] =>
   range
@@ -16,7 +17,7 @@ export default (repository: Repository) => {
   const blobsRouter = express.Router({ mergeParams: true });
   blobsRouter.use(bodyParser.raw({ type: 'application/octet-stream' }));
 
-  blobsRouter.route('/:digest').get(async (request: DigestRequest, res: Response) => {
+  blobsRouter.route('/:digest').get(digestValidator, (request: DigestRequest, res: Response) => {
     const { name, digest } = request.params;
     logger.debug('GET blob by digest %s %s', name, digest);
 
@@ -29,7 +30,7 @@ export default (repository: Repository) => {
     }
   });
 
-  blobsRouter.route('/uploads/').post(async (request: DigestSearchRequest, res: Response) => {
+  blobsRouter.route('/uploads/').post((request: DigestSearchRequest, res: Response) => {
     const { name } = request.params;
     const { digest } = request.query;
 
@@ -43,7 +44,7 @@ export default (repository: Repository) => {
     res.location(`${request.baseUrl}/uploads/${sessionId}`).sendStatus(202);
   });
 
-  blobsRouter.route('/uploads/:reference').patch(async (request: ReferenceRequest, res: Response) => {
+  blobsRouter.route('/uploads/:reference').patch(referenceValidator, (request: ReferenceRequest, res: Response) => {
     const { name, reference } = request.params;
 
     const type = request.header('content-type');
@@ -72,36 +73,38 @@ export default (repository: Repository) => {
     }
   });
 
-  blobsRouter.route('/uploads/:reference/').put(async (request: ReferenceDigestSearchRequest, res: Response) => {
-    const { name, reference } = request.params;
-    const { digest } = request.query;
-    logger.debug('PUT blob by reference and digest %s %s %s', name, reference, digest);
+  blobsRouter
+    .route('/uploads/:reference/')
+    .put(referenceValidator, (request: ReferenceDigestSearchRequest, res: Response) => {
+      const { name, reference } = request.params;
+      const { digest } = request.query;
+      logger.debug('PUT blob by reference and digest %s %s %s', name, reference, digest);
 
-    const range = request.header('content-range') as OciRange;
+      const range = request.header('content-range') as OciRange;
 
-    try {
-      if (range) {
-        const [start, end] = parseRange(range);
+      try {
+        if (range) {
+          const [start, end] = parseRange(range);
 
-        repository.updateBlob(name, reference, start ?? 0, end ?? 0, request.body);
-        repository.setBlobDigest(name, reference, digest);
-      } else {
-        repository.addBlob(name, reference, request.body);
-        repository.setBlobDigest(name, reference, digest);
+          repository.updateBlob(name, reference, start ?? 0, end ?? 0, request.body);
+          repository.setBlobDigest(name, reference, digest);
+        } else {
+          repository.addBlob(name, reference, request.body);
+          repository.setBlobDigest(name, reference, digest);
+        }
+        res.location(`${request.baseUrl}/${request.query.digest}`).sendStatus(201);
+      } catch (e) {
+        if (e instanceof OciRangeError) {
+          logger.debug(e);
+          res.status(416).json(errorResponse('BLOB_UPLOAD_INVALID', 'Requested Range Not Satisfiable'));
+        } else {
+          logger.debug(e);
+          res.status(404).json(errorResponse('BLOB_UPLOAD_UNKNOWN'));
+        }
       }
-      res.location(`${request.baseUrl}/${request.query.digest}`).sendStatus(201);
-    } catch (e) {
-      if (e instanceof OciRangeError) {
-        logger.debug(e);
-        res.status(416).json(errorResponse('BLOB_UPLOAD_INVALID', 'Requested Range Not Satisfiable'));
-      } else {
-        logger.debug(e);
-        res.status(404).json(errorResponse('BLOB_UPLOAD_UNKNOWN'));
-      }
-    }
-  });
+    });
 
-  blobsRouter.route('/:digest').delete(async (request: DigestRequest, res: Response) => {
+  blobsRouter.route('/:digest').delete(digestValidator, (request: DigestRequest, res: Response) => {
     const { name, digest } = request.params;
     logger.debug('DELETE blob by digest %s %s', name, digest);
 
@@ -110,7 +113,7 @@ export default (repository: Repository) => {
     res.sendStatus(202);
   });
 
-  blobsRouter.route('/uploads/').post(async (request: MountRequest, res: Response) => {
+  blobsRouter.route('/uploads/').post((request: MountRequest, res: Response) => {
     const { name } = request.params;
     const { mount: digest, from: otherName } = request.query;
     logger.debug('POST blob from another repository %s %s %s', name, digest, otherName);
@@ -120,7 +123,7 @@ export default (repository: Repository) => {
   });
 
   // distribution spec v1.1.0-rc2
-  blobsRouter.route('/uploads/:reference').get(async (request: ReferenceRequest, res: Response) => {
+  blobsRouter.route('/uploads/:reference').get(referenceValidator, (request: ReferenceRequest, res: Response) => {
     const { name, reference } = request.params;
     logger.debug('GET blob by reference %s %s', name, reference);
 

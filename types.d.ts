@@ -3,7 +3,7 @@ import { Buffer } from 'node:buffer';
 
 declare global {
   type OciName = string; // [a-z0-9]+((\.|_|__|-+)[a-z0-9]+)*(\/[a-z0-9]+((\.|_|__|-+)[a-z0-9]+)*)*
-  type OciAlgorithmComponent = string; // [a-z0-9]+]
+  type OciAlgorithmComponent = string; // [a-z0-9]+
   type OciEncoded = string; // [a-zA-Z0-9=_-]+
   type OciAlgorithmSeparator = '+' | '.' | '_' | '-';
   type OciOptionalAlgorithmComponent = `${OciAlgorithmSeparator}${OciAlgorithmComponent}` | ''; // FIXME:

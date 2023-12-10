@@ -3,6 +3,7 @@ import { type Buffer } from 'node:buffer';
 import bodyParser from 'body-parser';
 import logger from '../logger';
 import errorResponse from './errorfactory';
+import { referenceValidator } from './validators';
 
 declare module 'http' {
   interface IncomingMessage {
@@ -23,7 +24,7 @@ export default (repository: Repository) => {
     })
   );
 
-  manifestsRouter.route('/:reference').get(async (request: ReferenceRequest, res: Response) => {
+  manifestsRouter.route('/:reference').get(referenceValidator, (request: ReferenceRequest, res: Response) => {
     const { name, reference } = request.params;
     logger.debug('GET manifest by reference %s %s', name, reference);
 
@@ -37,7 +38,7 @@ export default (repository: Repository) => {
     }
   });
 
-  manifestsRouter.route('/:reference').put(async (request: ReferenceRequest, res: Response) => {
+  manifestsRouter.route('/:reference').put((request: ReferenceRequest, res: Response) => {
     const { name, reference } = request.params;
     logger.debug('PUT manifest by reference %s %s', name, reference);
 
@@ -57,7 +58,7 @@ export default (repository: Repository) => {
   });
 
   // Deletes either a manifest or a tag
-  manifestsRouter.route('/:reference').delete(async (request: ReferenceRequest, res: Response) => {
+  manifestsRouter.route('/:reference').delete(referenceValidator, (request: ReferenceRequest, res: Response) => {
     const { name, reference } = request.params;
     logger.debug('DELETE tags or manifest by digest %s %s', name, reference);
 

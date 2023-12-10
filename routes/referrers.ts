@@ -1,11 +1,12 @@
 import express, { type Response } from 'express';
 import logger from '../logger';
+import { digestValidator } from './validators';
 
 export default (repository: Repository) => {
   const referrersRouter = express.Router({ mergeParams: true });
 
   // distribution spec v1.1.0-rc1
-  referrersRouter.route('/:digest').get(async (request: DigestArtifactRequest, res: Response) => {
+  referrersRouter.route('/:digest').get(digestValidator, (request: DigestArtifactRequest, res: Response) => {
     const { name, digest } = request.params;
     const { artifactType } = request.query;
     logger.debug('GET referrers by digest and artifactType %s %s %s', name, digest, artifactType);

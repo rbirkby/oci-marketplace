@@ -4,7 +4,7 @@ import logger from '../logger';
 export default (repository: Repository) => {
   const tagsRouter = express.Router({ mergeParams: true });
 
-  tagsRouter.route('/list').get(async (request: PaginatedPlainRequest, res: Response) => {
+  tagsRouter.route('/list').get((request: PaginatedPlainRequest, res: Response) => {
     const { name } = request.params;
     const { n, last } = request.query;
     logger.debug('GET Tags from last %s %s %s', name, n, last);
