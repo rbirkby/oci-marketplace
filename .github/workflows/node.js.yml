@@ -2,9 +2,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ['master']
   pull_request:
-    branches: [ "master" ]
+    branches: ['master']
 
 jobs:
   build:
@@ -13,12 +13,30 @@ jobs:
       matrix:
         node-version: [18.x, 20.x]
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm test
+      - run: npm run start &
+      - run: sleep 10
+      - name: Run OCI Distribution Spec conformance tests
+        uses: opencontainers/distribution-spec@main
+        # you can also run against a specific tag or commit instead
+        # uses: opencontainers/distribution-spec@v1.1.0
+        env:
+          OCI_ROOT_URL: http://localhost:3000/
+          OCI_NAMESPACE: mytestorg/mytestrepo
+          OCI_USERNAME: ${{ secrets.MY_REGISTRY_USERNAME }}
+          OCI_PASSWORD: ${{ secrets.MY_REGISTRY_PASSWORD }}
+          OCI_TEST_PULL: 1
+          OCI_TEST_PUSH: 1
+          OCI_TEST_CONTENT_DISCOVERY: 1
+          OCI_TEST_CONTENT_MANAGEMENT: 1
+          OCI_HIDE_SKIPPED_WORKFLOWS: 0
+          OCI_DEBUG: 0
+          OCI_DELETE_MANIFEST_BEFORE_BLOBS: 0
