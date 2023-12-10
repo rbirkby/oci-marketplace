@@ -1,5 +1,5 @@
 import { type Request } from 'express';
-import { Buffer } from 'node:buffer';
+import { type Buffer } from 'node:buffer';
 
 declare global {
   type OciName = string; // [a-z0-9]+((\.|_|__|-+)[a-z0-9]+)*(\/[a-z0-9]+((\.|_|__|-+)[a-z0-9]+)*)*
