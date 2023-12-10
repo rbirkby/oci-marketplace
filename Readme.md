@@ -4,7 +4,7 @@ Implementation of the [OCI Distribution specification](https://github.com/openco
 
 ## Compatibility
 
-[![](https://github.com/rbirkby/oci-marketplace/workflows/oci-distribution-conformance/badge.svg)](https://github.com/rbirkby/oci-marketplace/actions?query=workflow%3Aoci-distribution-conformance)
+[![](https://github.com/rbirkby/oci-marketplace/workflows/Node.js CI/badge.svg)](https://github.com/rbirkby/oci-marketplace/actions?query=workflow%3Anode.js)
 
 - In-memory only storage
 - Validated against the OCI Distribution conformance suite only
