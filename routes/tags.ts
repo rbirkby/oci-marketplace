@@ -10,7 +10,6 @@ export default (repository: Repository) => {
     logger.debug('GET Tags from last %s %s %s', name, n, last);
 
     let tags = repository.getTags(name).toSorted();
-
     if (last && n) {
       tags = tags.slice(tags.indexOf(last), n);
     } else if (last) {

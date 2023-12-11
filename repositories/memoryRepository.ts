@@ -52,14 +52,16 @@ export default class MemoryRepository implements Repository {
       throw new OciBlobNotFound('Blob not found');
     }
 
-    const firstFreeBytePosition = blob.data.length === 0 ? 0 : blob.data.length + 1;
+    const firstFreeBytePosition = blob.data.length === 0 ? 0 : blob.data.length;
 
     if (rangeStart !== firstFreeBytePosition) {
-      throw new OciRangeError('Range start is not contiguous with existing chunks');
+      throw new OciRangeError(
+        `Range start is not contiguous with existing chunks. Expected ${firstFreeBytePosition} received ${rangeStart}`
+      );
     }
 
-    if (rangeEnd > blob.data.length) {
-      const newBuffer = Buffer.alloc(rangeEnd);
+    if (Math.max(rangeEnd, chunk.length) > blob.data.length) {
+      const newBuffer = Buffer.alloc(Math.max(rangeEnd, chunk.length));
       blob.data.copy(newBuffer);
       blob.data = newBuffer;
     }
@@ -85,7 +87,7 @@ export default class MemoryRepository implements Repository {
   }
 
   deleteBlob(name: OciName, digest: OciDigest) {
-    this.blobs = this.blobs.filter((blob) => blob.name !== name && blob.digest !== digest);
+    this.blobs = this.blobs.filter((blob) => blob.name !== name || blob.digest !== digest);
   }
 
   getManifest(name: OciName, reference: OciReference) {
@@ -117,7 +119,7 @@ export default class MemoryRepository implements Repository {
     return digest;
   }
 
-  getReferrers(name: OciName): OciDescriptorV1[] {
+  getReferrers(name: OciName, digest: OciDigest): OciDescriptorV1[] {
     const dummyDescriptor: OciDescriptorV1 = {
       digest: 'sha256:dummy',
       mediaType: '',
@@ -125,27 +127,38 @@ export default class MemoryRepository implements Repository {
     };
 
     return this.manifests
-      .filter((manifest) => manifest.name === name && manifest.value.subject)
+      .filter((manifest) => manifest.name === name && manifest.value.subject?.digest === digest)
       .map((manifest) => ({
-        artifactType: manifest.value.config?.mediaType ?? '',
-        ...(manifest.value.subject ?? dummyDescriptor)
+        artifactType: manifest.value.artifactType ?? manifest.value.config?.mediaType,
+        ...(manifest.value.subject ?? dummyDescriptor),
+        digest: manifest.digest,
+        annotations: manifest.value.annotations ?? {}
       }));
   }
 
   addTag(name: OciName, value: OciTag, digest: OciDigest) {
     // Remove existing tag with same value
-    this.tags = this.tags.filter((tag) => tag.name !== name && tag.value !== value);
+    this.tags = this.tags.filter((tag) => tag.name !== name || tag.value !== value);
+
     this.tags.push({ name, value, digest });
   }
 
   deleteManifestOrTag(name: OciName, reference: OciReference) {
     if (this.isDigest(reference)) {
       // delete manifest
-      this.manifests = this.manifests.filter((manifest) => manifest.name !== name && manifest.digest !== reference);
+      this.manifests = this.manifests.filter((manifest) => manifest.name !== name || manifest.digest !== reference);
       this.tags = this.tags.filter((tag) => tag.name !== name && tag.digest !== reference);
     } else {
       // delete tag
       this.tags = this.tags.filter((tag) => tag.name !== name && tag.value !== reference);
     }
+  }
+
+  getDebugInfo() {
+    return {
+      manifests: JSON.stringify(this.manifests),
+      blobs: JSON.stringify(this.blobs),
+      tags: JSON.stringify(this.tags)
+    };
   }
 }

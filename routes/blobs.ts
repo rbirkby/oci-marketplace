@@ -84,13 +84,19 @@ export default (repository: Repository) => {
 
       try {
         if (range) {
+          // chunked POST, PATCH, PUT
           const [start, end] = parseRange(range);
 
-          repository.updateBlob(name, reference, start ?? 0, end ?? 0, request.body);
+          repository.updateBlob(name, reference, start ?? 0, end ?? request.body.length, request.body);
           repository.setBlobDigest(name, reference, digest);
         } else {
-          repository.addBlob(name, reference, request.body);
-          repository.setBlobDigest(name, reference, digest);
+          // monolithic POST then PUT
+          // Closing PUT doesn't send content-range header with zero length request
+          // https://github.com/opencontainers/distribution-spec/blob/9317d9bca4f2f57355d875f562a2c9f688043961/conformance/02_push_test.go#L244
+          if (request.body.length > 0) {
+            repository.updateBlob(name, reference, 0, 0, request.body);
+            repository.setBlobDigest(name, reference, digest);
+          }
         }
         res.location(`${request.baseUrl}/${request.query.digest}`).sendStatus(201);
       } catch (e) {
@@ -128,7 +134,7 @@ export default (repository: Repository) => {
     logger.debug('GET blob by reference %s %s', name, reference);
 
     try {
-      const end = repository.getBlobLength(name, reference);
+      const end = repository.getBlobLength(name, reference) - 1;
       res.header('Range', `0-${end}`).location(`${request.baseUrl}/uploads/${reference}`).sendStatus(204);
     } catch (e) {
       logger.debug(e);

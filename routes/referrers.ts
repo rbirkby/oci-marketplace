@@ -15,7 +15,7 @@ export default (repository: Repository) => {
       schemaVersion: 2,
       mediaType: 'application/vnd.oci.image.index.v1+json',
       manifests: repository
-        .getReferrers(name)
+        .getReferrers(name, digest)
         .filter((manifest) => artifactType === undefined || manifest.artifactType === artifactType)
     };
 
@@ -26,8 +26,7 @@ export default (repository: Repository) => {
       // This is insecure according to https://github.com/expressjs/express/issues/3490
       'content-type': 'application/vnd.oci.image.index.v1+json'
     };
-    if (artifactType)
-      headers['oci-filters-applied'] = Array.isArray(artifactType) ? artifactType.join(',') : String(artifactType);
+    if (artifactType) headers['oci-filters-applied'] = 'artifactType';
 
     res.writeHead(200, headers).end(JSON.stringify(imageIndex));
   });

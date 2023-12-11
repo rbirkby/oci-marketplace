@@ -3,6 +3,7 @@ import blobsRouter from './blobs';
 import manifestsRouter from './manifests';
 import referrersRouter from './referrers';
 import tagsRouter from './tags';
+import debugRouter from './debug';
 import { nameValidator } from './validators';
 
 export default function (app: Application, repository: Repository) {
@@ -12,6 +13,7 @@ export default function (app: Application, repository: Repository) {
     res.sendStatus(200);
   });
 
+  app.use('/debug', debugRouter(repository));
   app.use('/v2/:name(*)/blobs', nameValidator, blobsRouter(repository));
   app.use('/v2/:name(*)/manifests', nameValidator, manifestsRouter(repository));
   app.use('/v2/:name(*)/referrers', nameValidator, referrersRouter(repository));

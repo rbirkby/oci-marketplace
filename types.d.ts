@@ -28,6 +28,7 @@ declare global {
     layers: OciDescriptorV1[];
     annotations?: Record<string, string>;
     subject?: OciDescriptorV1;
+    artifactType?: OciMediaType;
   };
 
   type OciRangeIndex = number;

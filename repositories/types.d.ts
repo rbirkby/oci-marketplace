@@ -12,6 +12,7 @@ declare global {
     deleteManifestOrTag(name: OciName, reference: OciReference): void;
     updateBlob(name: OciName, reference: OciReference, rangeStart: number, rangeEnd: number, chunk: Buffer): void;
     setBlobDigest(name: OciName, reference: OciReference, digest: OciDigest): void;
-    getReferrers(name: OciName): OciDescriptorV1[];
+    getReferrers(name: OciName, digest: OciDigest): OciDescriptorV1[];
+    getDebugInfo(): Record<string, string>;
   }
 }
