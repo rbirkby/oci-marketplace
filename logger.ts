@@ -6,7 +6,8 @@ export default pino({
     options: {
       colorize: true,
       singleLine: true,
-      sync: true
+      sync: true,
+      ignore: 'pid,req.remoteAddress,req.remotePort,req.id,req.headers.host,responseTime,res.headers.etag'
     }
   },
   level: process.env.PINO_LOG_LEVEL || 'info'

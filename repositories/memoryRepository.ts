@@ -63,6 +63,7 @@ export default class MemoryRepository implements Repository {
       blob.data.copy(newBuffer);
       blob.data = newBuffer;
     }
+
     chunk.copy(blob.data, rangeStart);
   }
 

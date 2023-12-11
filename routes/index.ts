@@ -1,4 +1,3 @@
-import helmet from 'helmet';
 import { type Application } from 'express';
 import blobsRouter from './blobs';
 import manifestsRouter from './manifests';
@@ -7,7 +6,7 @@ import tagsRouter from './tags';
 import { nameValidator } from './validators';
 
 export default function (app: Application, repository: Repository) {
-  app.use(helmet());
+  app.disable('x-powered-by');
 
   app.route('/v2').get((request, res) => {
     res.sendStatus(200);
