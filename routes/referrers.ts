@@ -9,7 +9,7 @@ export default (repository: Repository) => {
   referrersRouter.route('/:digest').get(digestValidator, (request: DigestArtifactRequest, res: Response) => {
     const { name, digest } = request.params;
     const { artifactType } = request.query;
-    logger.debug('GET referrers by digest and artifactType %s %s %s', name, digest, artifactType);
+    logger.debug('GET referrers by digest and artifactType %s %s %s', name, String(digest), String(artifactType));
 
     const imageIndex = {
       schemaVersion: 2,

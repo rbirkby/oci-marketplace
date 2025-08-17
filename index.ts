@@ -5,12 +5,7 @@ import logger from './logger';
 import MemoryRepository from './repositories/memoryRepository';
 
 const app = express();
-app.use(
-  pinoHttp({
-    logger,
-    sync: true
-  })
-);
+app.use(pinoHttp({ logger }));
 
 routes(app, new MemoryRepository());
 

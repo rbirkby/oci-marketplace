@@ -7,7 +7,7 @@ export default (repository: Repository) => {
   tagsRouter.route('/list').get((request: PaginatedPlainRequest, res: Response) => {
     const { name } = request.params;
     const { n, last } = request.query;
-    logger.debug('GET Tags from last %s %s %s', name, n, last);
+    logger.debug('GET Tags from last %s %s %s', name, String(n), String(last));
 
     let tags = repository.getTags(name).toSorted();
     if (last && n) {

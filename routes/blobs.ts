@@ -37,7 +37,7 @@ export default (repository: Repository) => {
     const type = request.header('content-type');
     const length = request.header('content-length');
 
-    logger.debug('POST blob, optionally by digest %s %s %s %s', name, digest, type, length);
+    logger.debug('POST blob, optionally by digest %s %s %s %s', name, String(digest), String(type), String(length));
 
     const sessionId = uuidv4();
     repository.addBlob(name, sessionId, Buffer.alloc(0));
@@ -51,7 +51,7 @@ export default (repository: Repository) => {
     const range = request.header('content-range') as OciRange; // Optional per test suite. Mandatory per spec.
     const length = request.header('content-length');
 
-    logger.debug('PATCH blob by reference %s %s %s %s %s', name, reference, type, range, length);
+    logger.debug('PATCH blob by reference %s %s %s %s %s', name, reference, String(type), range, String(length));
 
     const [start, end] = range ? parseRange(range) : [0, parseInt(length ?? '0')];
 
@@ -122,7 +122,7 @@ export default (repository: Repository) => {
   blobsRouter.route('/uploads/').post((request: MountRequest, res: Response) => {
     const { name } = request.params;
     const { mount: digest, from: otherName } = request.query;
-    logger.debug('POST blob from another repository %s %s %s', name, digest, otherName);
+    logger.debug('POST blob from another repository %s %s %s', name, String(digest), String(otherName));
 
     // Implementation does not support cross-repository mounting
     res.sendStatus(202);
