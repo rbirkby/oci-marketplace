@@ -14,10 +14,10 @@ export default function (app: Application, repository: Repository) {
   });
 
   app.use('/debug', debugRouter(repository));
-  app.use('/v2/:name(*)/blobs', nameValidator, blobsRouter(repository));
-  app.use('/v2/:name(*)/manifests', nameValidator, manifestsRouter(repository));
-  app.use('/v2/:name(*)/referrers', nameValidator, referrersRouter(repository));
-  app.use('/v2/:name(*)/tags', nameValidator, tagsRouter(repository));
+  app.use('/v2/:name{*splat}/blobs', nameValidator, blobsRouter(repository));
+  app.use('/v2/:name{*splat}/manifests', nameValidator, manifestsRouter(repository));
+  app.use('/v2/:name{*splat}/referrers', nameValidator, referrersRouter(repository));
+  app.use('/v2/:name{*splat}/tags', nameValidator, tagsRouter(repository));
 
   app.use((request, res) => {
     res.sendStatus(404);
